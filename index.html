@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Трекер достижений на каждый день: отмечайте привычки и дни, ведите здоровый образ жизни и дисциплину.">
-  <meta name="theme-color" content="#1a1d23">
+  <meta name="theme-color" content="#5cb85c">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="LevelUp">
@@ -14,27 +14,28 @@
   <link rel="apple-touch-icon" href="icon-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1115;
-      --card: #1a1d23;
-      --card-hover: #22262e;
-      --text: #e8eaed;
-      --text-muted: #9aa0a6;
-      --accent: #4a7c59;
-      --accent-soft: #5a9a6a;
-      --accent-light: #2d3b32;
-      --chart-green: #4ade80;
-      --chart-blue: #60a5fa;
-      --chart-purple: #a78bfa;
-      --chart-orange: #fb923c;
-      --chart-teal: #2dd4bf;
-      --chart-bg: #1a2332;
-      --border: #2d3239;
-      --shadow: rgba(0, 0, 0, 0.3);
+      --bg: #f5f7f5;
+      --card: #ffffff;
+      --card-hover: #f0f4f0;
+      --text: #1a2e1a;
+      --text-muted: #6b7c6b;
+      --accent: #5cb85c;
+      --accent-soft: #6ed46e;
+      --accent-light: #e8f5e8;
+      --accent-pale: #d4eed4;
+      --chart-green: #5cb85c;
+      --chart-blue: #5b9bd5;
+      --chart-orange: #f0ad4e;
+      --chart-teal: #5bc0de;
+      --chart-bg: #f8faf8;
+      --border: #e0e8e0;
+      --shadow: rgba(0, 0, 0, 0.06);
       --radius: 16px;
-      --radius-sm: 10px;
+      --radius-sm: 12px;
+      --nav-height: 72px;
     }
 
     * {
@@ -44,7 +45,7 @@
     }
 
     body {
-      font-family: 'Manrope', sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -157,11 +158,10 @@
       }
       .chart-card .month-stats { font-size: 0.9rem; opacity: 0.9; }
       .progress-circles { gap: 1.25rem; }
-      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) .streak-block {
+      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) .weekly-progress-card {
         padding: 1.5rem 1.75rem;
-        border-radius: 14px;
       }
-      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) .streak-block .value { font-size: 1.9rem; }
+      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) .weekly-progress-card .value { font-size: 1.9rem; }
       .progress-circle-wrap {
         padding: 1.35rem 1rem;
         border-radius: 14px;
@@ -200,17 +200,16 @@
     }
 
     @media (max-width: 1023px) {
-      .app-screen { max-width: 560px; justify-content: flex-start; padding-top: 2.5rem; width: 100%; padding-left: 1.5rem; padding-right: 1.5rem; }
+      .app-screen { max-width: 560px; justify-content: flex-start; padding-top: 2.5rem; padding-bottom: 1.5rem; width: 100%; padding-left: 1.5rem; padding-right: 1.5rem; }
     }
 
     .hidden { display: none !important; }
 
     h1 {
-      font-family: 'Playfair Display', serif;
       font-size: 1.75rem;
       color: var(--text);
       margin-bottom: 0.5rem;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .subtitle {
@@ -221,11 +220,11 @@
 
     .card {
       background: var(--card);
-      border: 1px solid var(--border);
+      border: none;
       border-radius: var(--radius);
       padding: 1.5rem;
       margin-bottom: 1.25rem;
-      box-shadow: 0 4px 24px var(--shadow);
+      box-shadow: 0 2px 16px var(--shadow);
     }
 
     .card h2 {
@@ -330,27 +329,83 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+    }
+
+    .header-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .header-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .header-greeting {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 0.15rem;
     }
 
     .user-name {
       font-weight: 600;
       color: var(--text);
+      font-size: 1.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: var(--card);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .header-icon:hover {
+      background: var(--accent-light);
+      color: var(--accent);
     }
 
     .btn-logout {
       padding: 0.5rem 1rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       width: auto;
-      background: transparent;
+      background: var(--card);
       color: var(--text-muted);
-      border: 1px solid var(--border);
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
     }
 
     .btn-logout:hover {
       background: var(--accent-light);
       color: var(--accent);
-      border-color: var(--accent-soft);
     }
 
     .add-task-row {
@@ -662,13 +717,119 @@
     .dashboard-intro h3 { font-size: 1rem; margin-bottom: 0.35rem; color: var(--text); }
     .dashboard-intro p { font-size: 0.9rem; color: var(--text-muted); }
 
+    .weekly-progress-card {
+      background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-pale) 100%);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .weekly-progress-card .label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .weekly-progress-card .value { font-size: 1.75rem; font-weight: 700; color: var(--text); }
+    .weekly-progress-card .value span { font-size: 0.95rem; font-weight: 500; color: var(--text-muted); }
+
+    .weekly-progress-ring {
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .weekly-progress-ring svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .weekly-progress-ring .ring-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.6);
+      stroke-width: 6;
+    }
+    .weekly-progress-ring .ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 0 214;
+      transition: stroke-dasharray 0.3s;
+    }
+    .weekly-progress-ring .ring-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+
+    .activity-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .activity-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 2px 12px var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .activity-card .icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .activity-card.steps .icon { background: #fff3e6; color: var(--chart-orange); }
+    .activity-card.water .icon { background: #e6f3ff; color: var(--chart-blue); }
+    .activity-card .title { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.2rem; }
+    .activity-card .value { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .activity-card .activity-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+    .activity-btn { font-size: 0.7rem; padding: 0.3rem 0.5rem; border-radius: 8px; border: none; background: var(--accent-light); color: var(--accent); cursor: pointer; font-family: inherit; }
+    .activity-btn.link { background: none; color: var(--text-muted); }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .modal-content {
+      background: var(--card);
+      padding: 1.5rem;
+      border-radius: 20px;
+      max-width: 320px;
+      width: 90%;
+      position: relative;
+    }
+    .modal-content h3 { margin-bottom: 1rem; font-size: 1.1rem; }
+    .modal-content input { width: 100%; margin-bottom: 1rem; }
+    .modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
     .streak-block {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 1rem 1.25rem;
       background: var(--card-hover);
-      border: 1px solid var(--border);
+      border: none;
       border-radius: var(--radius-sm);
       margin-bottom: 1rem;
     }
@@ -826,14 +987,53 @@
 
   <div id="app-screen" class="app-screen hidden">
     <div class="header-row">
-      <span class="user-name">Привет, <span id="current-username"></span></span>
-      <button type="button" class="btn btn-logout" id="btn-logout">Выйти</button>
+      <div class="header-profile">
+        <div class="header-avatar" id="header-avatar">?</div>
+        <div>
+          <span class="header-greeting" id="header-greeting">Доброе утро!</span>
+          <span class="user-name"><span id="current-username"></span></span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="header-icon" aria-label="Уведомления">🔔</button>
+        <button type="button" class="header-icon" id="btn-refresh" aria-label="Обновить">↻</button>
+        <button type="button" class="btn btn-logout" id="btn-logout">Выйти</button>
+      </div>
     </div>
 
     <div class="card">
-      <div class="streak-block" id="streak-block">
-        <span class="label">Текущая серия</span>
-        <span class="value" id="streak-value">0 <span>дней подряд</span></span>
+      <div class="weekly-progress-card">
+        <div>
+          <span class="label">Ежедневная цель</span>
+          <div class="value" id="streak-value">0 <span>дней подряд</span></div>
+        </div>
+        <div class="weekly-progress-ring">
+          <svg viewBox="0 0 80 80">
+            <circle class="ring-bg" cx="40" cy="40" r="34"/>
+            <circle class="ring-fill" id="streak-ring-svg" cx="40" cy="40" r="34"/>
+          </svg>
+          <span class="ring-value" id="streak-ring">0</span>
+        </div>
+      </div>
+      <div class="activity-cards">
+        <div class="activity-card steps" id="steps-card">
+          <div class="icon">👟</div>
+          <div class="activity-card-content">
+            <div class="title">Шаги</div>
+            <div class="value" id="activity-steps">—</div>
+            <div class="activity-actions">
+              <button type="button" class="activity-btn" id="btn-enable-pedometer">Включить шагомер</button>
+              <button type="button" class="activity-btn link" id="btn-manual-steps">Ввести вручную</button>
+            </div>
+          </div>
+        </div>
+        <div class="activity-card water">
+          <div class="icon">💧</div>
+          <div>
+            <div class="title">Вода</div>
+            <div class="value" id="activity-water">—</div>
+          </div>
+        </div>
       </div>
       <div class="progress-circles" id="progress-circles"></div>
       <div class="chart-card">
@@ -901,61 +1101,157 @@
         <span class="legend-item"><span class="legend-dot achievement"></span> день достижения</span>
       </div>
     </div>
-   
+
+    <div id="steps-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h3>Шаги за сегодня</h3>
+        <input type="number" id="manual-steps-input" placeholder="Введите количество" min="0" max="999999">
+        <button type="button" class="btn btn-primary" id="btn-save-manual-steps">Сохранить</button>
+        <button type="button" class="modal-close" id="btn-close-steps-modal">×</button>
+      </div>
+    </div>
+
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     (function() {
-      const STORAGE_USERS = 'tracker_users';
-      const STORAGE_DATA = 'tracker_data';
-      const STORAGE_CURRENT = 'tracker_current_user';
+      const DB_NAME = 'LevelUpTracker';
+      const DB_VERSION = 1;
+      const STORE = 'kv';
 
       const weekdays = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
       const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
       const monthsShort = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
       const DEFAULT_TASKS = ['Пробежка или ходьба', 'Вода 1,5–2 л', 'Зарядка 10 мин', 'Сон до 23:00', 'Чтение 20 мин'];
 
-      function getUsers() {
+      var db = null;
+      var cache = { users: {}, userData: {}, currentUser: null };
+
+      function openDB() {
+        return new Promise(function(resolve, reject) {
+          var req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onerror = function() { reject(req.error); };
+          req.onsuccess = function() { db = req.result; resolve(db); };
+          req.onupgradeneeded = function(e) {
+            if (!e.target.result.objectStoreNames.contains(STORE)) {
+              e.target.result.createObjectStore(STORE);
+            }
+          };
+        });
+      }
+
+      function idbGet(key) {
+        return new Promise(function(resolve, reject) {
+          if (!db) { resolve(null); return; }
+          var tx = db.transaction(STORE, 'readonly');
+          var req = tx.objectStore(STORE).get(key);
+          req.onsuccess = function() { resolve(req.result); };
+          req.onerror = function() { reject(req.error); };
+        });
+      }
+
+      function idbSet(key, val) {
+        return new Promise(function(resolve, reject) {
+          if (!db) { resolve(); return; }
+          var tx = db.transaction(STORE, 'readwrite');
+          var req = tx.objectStore(STORE).put(val, key);
+          req.onsuccess = function() { resolve(); };
+          req.onerror = function() { reject(req.error); };
+        });
+      }
+
+      function migrateFromLocalStorage() {
         try {
-          const raw = localStorage.getItem(STORAGE_USERS);
-          return raw ? JSON.parse(raw) : {};
-        } catch (e) { return {}; }
+          var rawU = localStorage.getItem('tracker_users');
+          var rawD = localStorage.getItem('tracker_data');
+          var rawC = localStorage.getItem('tracker_current_user');
+          if (rawU) cache.users = JSON.parse(rawU);
+          if (rawD) cache.userData = JSON.parse(rawD);
+          if (rawC) cache.currentUser = rawC;
+        } catch (e) {}
+      }
+
+      function initStorage() {
+        return openDB()
+          .then(function() {
+            return Promise.all([
+              idbGet('users'),
+              idbGet('userData'),
+              idbGet('currentUser')
+            ]);
+          })
+          .then(function(vals) {
+            if (vals[0]) cache.users = vals[0];
+            if (vals[1]) cache.userData = vals[1];
+            if (vals[2]) cache.currentUser = vals[2];
+            if (Object.keys(cache.users).length === 0 && Object.keys(cache.userData).length === 0) {
+              migrateFromLocalStorage();
+              return persistAll();
+            }
+            return Promise.resolve();
+          })
+          .catch(function() {
+            migrateFromLocalStorage();
+          });
+      }
+
+      function persistAll() {
+        return Promise.all([
+          idbSet('users', cache.users),
+          idbSet('userData', cache.userData),
+          idbSet('currentUser', cache.currentUser)
+        ]).catch(function() {});
+      }
+
+      function getUsers() {
+        return cache.users || {};
       }
 
       function saveUsers(users) {
-        localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
+        cache.users = users;
+        idbSet('users', users).catch(function() {});
       }
 
       function getUserData(username) {
-        try {
-          const raw = localStorage.getItem(STORAGE_DATA);
-          const all = raw ? JSON.parse(raw) : {};
-          if (!all[username]) {
-            all[username] = { tasks: [], dailyDone: {}, monthAchievements: {} };
-          }
-          return all[username];
-        } catch (e) {
-          return { tasks: [], dailyDone: {}, monthAchievements: {} };
+        var all = cache.userData || {};
+        if (!all[username]) {
+          all[username] = { tasks: [], dailyDone: {}, monthAchievements: {}, dailySteps: {} };
         }
+        if (!all[username].dailySteps) all[username].dailySteps = {};
+        return all[username];
+      }
+
+      function getStepsToday() {
+        var user = getCurrentUser();
+        if (!user) return 0;
+        var data = getUserData(user);
+        var today = todayKey();
+        return (data.dailySteps || {})[today] || 0;
+      }
+
+      function setStepsToday(n) {
+        var user = getCurrentUser();
+        if (!user) return;
+        var data = getUserData(user);
+        if (!data.dailySteps) data.dailySteps = {};
+        data.dailySteps[todayKey()] = Math.max(0, parseInt(n, 10) || 0);
+        setUserData(user, data);
       }
 
       function setUserData(username, data) {
-        let all = {};
-        try {
-          const raw = localStorage.getItem(STORAGE_DATA);
-          all = raw ? JSON.parse(raw) : {};
-        } catch (e) {}
-        all[username] = data;
-        localStorage.setItem(STORAGE_DATA, JSON.stringify(all));
+        if (!cache.userData) cache.userData = {};
+        cache.userData[username] = data;
+        idbSet('userData', cache.userData).catch(function() {});
       }
 
       function getCurrentUser() {
-        return localStorage.getItem(STORAGE_CURRENT) || null;
+        return cache.currentUser || null;
       }
 
       function setCurrentUser(username) {
-        if (username) localStorage.setItem(STORAGE_CURRENT, username);
-        else localStorage.removeItem(STORAGE_CURRENT);
+        cache.currentUser = username;
+        idbSet('currentUser', username).catch(function() {});
       }
 
       function todayKey() {
@@ -980,6 +1276,7 @@
           document.getElementById('form-login').classList.toggle('hidden', t !== 'login');
           document.getElementById('form-register').classList.toggle('hidden', t !== 'register');
           authError.classList.add('hidden');
+          authError.style.color = ''; authError.style.background = '';
         });
       });
 
@@ -990,6 +1287,7 @@
         const users = getUsers();
         if (!users[username] || users[username] !== btoa(encodeURIComponent(password))) {
           authError.textContent = 'Неверный логин или пароль';
+          authError.style.color = ''; authError.style.background = '';
           authError.classList.remove('hidden');
           return;
         }
@@ -1004,17 +1302,20 @@
         const password = document.getElementById('reg-password').value;
         if (username.length < 2) {
           authError.textContent = 'Имя пользователя минимум 2 символа';
+          authError.style.color = ''; authError.style.background = '';
           authError.classList.remove('hidden');
           return;
         }
         if (password.length < 4) {
           authError.textContent = 'Пароль минимум 4 символа';
+          authError.style.color = ''; authError.style.background = '';
           authError.classList.remove('hidden');
           return;
         }
         const users = getUsers();
         if (users[username]) {
           authError.textContent = 'Такой пользователь уже есть';
+          authError.style.color = ''; authError.style.background = '';
           authError.classList.remove('hidden');
           return;
         }
@@ -1030,19 +1331,148 @@
         setCurrentUser(null);
         appScreen.classList.add('hidden');
         authScreen.classList.remove('hidden');
+        authError.textContent = 'Вы вышли. Данные сохранены на устройстве — войдите снова в любое время.';
+        authError.style.color = 'var(--accent)';
+        authError.style.background = 'var(--accent-light)';
+        authError.classList.remove('hidden');
       });
+
+      var btnRefresh = document.getElementById('btn-refresh');
+      if (btnRefresh) btnRefresh.addEventListener('click', function() {
+        updateDashboard();
+        loadTasks();
+        renderCalendar();
+      });
+
+
+      function getGreeting() {
+        var h = new Date().getHours();
+        if (h < 12) return 'Доброе утро!';
+        if (h < 18) return 'Добрый день!';
+        return 'Добрый вечер!';
+      }
 
       function showApp() {
         authScreen.classList.add('hidden');
         appScreen.classList.remove('hidden');
         const user = getCurrentUser();
         document.getElementById('current-username').textContent = user;
+        var av = document.getElementById('header-avatar');
+        if (av) av.textContent = (user || '?').charAt(0).toUpperCase();
+        var gr = document.getElementById('header-greeting');
+        if (gr) gr.textContent = getGreeting();
         updateTodayBadge();
         renderQuickAdd();
         loadTasks();
         updateDashboard();
         renderCalendar();
         updateDayAchievementButton();
+        updateActivityCards();
+      }
+
+      function updateActivityCards() {
+        var user = getCurrentUser();
+        if (!user) return;
+        var steps = getStepsToday();
+        var stepsEl = document.getElementById('activity-steps');
+        if (stepsEl) stepsEl.textContent = steps > 0 ? steps.toLocaleString('ru') + ' шагов' : '—';
+        var data = getUserData(user);
+        var today = todayKey();
+        var done = (data.dailyDone || {})[today] || [];
+        var tasks = (data.tasks || []);
+        var waterTask = tasks.find(function(t) { return (t.name || '').toLowerCase().indexOf('вод') >= 0; });
+        var waterEl = document.getElementById('activity-water');
+        if (waterEl) waterEl.textContent = waterTask && done.indexOf(waterTask.id) >= 0 ? 'Выполнено ✓' : (waterTask ? 'Не выполнено' : '—');
+        updateStepsButtonsState();
+      }
+
+      function updateStepsButtonsState() {
+        var btnEnable = document.getElementById('btn-enable-pedometer');
+        var btnManual = document.getElementById('btn-manual-steps');
+        if (pedometerActive && btnEnable) {
+          btnEnable.textContent = 'Шагомер активен';
+          btnEnable.disabled = true;
+        } else if (btnEnable) {
+          btnEnable.textContent = 'Включить шагомер';
+          btnEnable.disabled = false;
+        }
+      }
+
+      var pedometerActive = false;
+      var stepCount = 0;
+      var lastStepTime = 0;
+      var accelHistory = [];
+      var smoothedAccel = 0;
+      var lastPeak = 0;
+      var rising = false;
+
+      function addStep() {
+        var now = Date.now();
+        if (now - lastStepTime < 350) return;
+        lastStepTime = now;
+        setStepsToday(getStepsToday() + 1);
+        updateActivityCards();
+      }
+
+      function startPedometer() {
+        if (pedometerActive) return;
+        function onMotion(e) {
+          var a = e.accelerationIncludingGravity;
+          if (!a || a.x == null) return;
+          var mag = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+          smoothedAccel = 0.7 * smoothedAccel + 0.3 * mag;
+          accelHistory.push(smoothedAccel);
+          if (accelHistory.length > 20) accelHistory.shift();
+          if (accelHistory.length < 5) return;
+          var i = accelHistory.length - 2;
+          var curr = accelHistory[i];
+          var prev = accelHistory[i-1];
+          var next = accelHistory[i+1];
+          var avg = (accelHistory.slice(0, i).reduce(function(s,x){return s+x},0) + accelHistory.slice(i+1).reduce(function(s,x){return s+x},0)) / (accelHistory.length - 1);
+          if (curr > avg + 0.3 && curr > prev && curr > next && !rising) {
+            addStep();
+            rising = true;
+          } else if (curr < prev) {
+            rising = false;
+          }
+        }
+        function reqPerm() {
+          if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            DeviceMotionEvent.requestPermission().then(function(perm) {
+              if (perm === 'granted') {
+                window.addEventListener('devicemotion', onMotion);
+                pedometerActive = true;
+                updateStepsButtonsState();
+              }
+            }).catch(function() {});
+          } else {
+            window.addEventListener('devicemotion', onMotion);
+            pedometerActive = true;
+            updateStepsButtonsState();
+          }
+        }
+        reqPerm();
+      }
+
+      document.getElementById('btn-enable-pedometer').addEventListener('click', startPedometer);
+      document.getElementById('btn-manual-steps').addEventListener('click', function() {
+        var inp = document.getElementById('manual-steps-input');
+        var modal = document.getElementById('steps-modal');
+        if (inp) inp.value = getStepsToday() || '';
+        if (modal) modal.classList.remove('hidden');
+      });
+      document.getElementById('btn-save-manual-steps').addEventListener('click', function() {
+        var inp = document.getElementById('manual-steps-input');
+        if (inp) setStepsToday(inp.value);
+        document.getElementById('steps-modal').classList.add('hidden');
+        updateActivityCards();
+      });
+      document.getElementById('btn-close-steps-modal').addEventListener('click', closeStepsModal);
+      document.getElementById('steps-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeStepsModal();
+      });
+      function closeStepsModal() {
+        document.getElementById('steps-modal').classList.add('hidden');
       }
 
       function updateDashboard() {
@@ -1072,8 +1502,16 @@
       function updateStreak() {
         var n = getStreak();
         var el = document.getElementById('streak-value');
-        if (!el) return;
-        el.innerHTML = n + ' <span>дней подряд</span>';
+        if (el) el.innerHTML = n + ' <span>дней подряд</span>';
+        var ring = document.getElementById('streak-ring');
+        if (ring) ring.textContent = n;
+        var ringSvg = document.getElementById('streak-ring-svg');
+        if (ringSvg) {
+          var c = 2 * Math.PI * 34;
+          var fill = Math.min(n / 7, 1) * c;
+          ringSvg.setAttribute('stroke-dasharray', fill + ' ' + c);
+        }
+        updateActivityCards();
       }
 
       function updateProgressCircles() {
@@ -1551,12 +1989,15 @@
       });
 
       // --- Init ---
-      if (getCurrentUser()) {
-        showApp();
-      } else {
-        authScreen.classList.remove('hidden');
-        appScreen.classList.add('hidden');
+      function runApp() {
+        if (getCurrentUser()) {
+          showApp();
+        } else {
+          authScreen.classList.remove('hidden');
+          appScreen.classList.add('hidden');
+        }
       }
+      initStorage().then(runApp).catch(runApp);
     })();
   </script>
 </body>
