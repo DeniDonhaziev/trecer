@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Трекер достижений на каждый день: отмечайте привычки и дни, ведите здоровый образ жизни и дисциплину.">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LevelUp">
+  <title>LevelUp — Трекер достижений</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-512.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-512.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #000000;
+      --card: #1c1c1e;
+      --card-hover: #2c2c2e;
+      --text: #ffffff;
+      --text-muted: rgba(235, 235, 245, 0.6);
+      --accent: #30d158;
+      --accent-soft: #34c759;
+      --accent-light: rgba(48, 209, 88, 0.18);
+      --accent-pale: rgba(48, 209, 88, 0.12);
+      --chart-green: #30d158;
+      --chart-blue: #0a84ff;
+      --chart-orange: #ff9f0a;
+      --chart-teal: #64d2ff;
+      --chart-purple: #bf5af2;
+      --chart-bg: #1c1c1e;
+      --border: rgba(255, 255, 255, 0.1);
+      --shadow: transparent;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --nav-height: 72px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .auth-screen, .app-screen {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    @media (min-width: 768px) {
+      .auth-screen { max-width: 420px; padding: 2.5rem; }
+      .app-screen { max-width: 720px; padding: 2rem 2.5rem; padding-top: 2.5rem; }
+      .progress-circles { grid-template-columns: repeat(4, 1fr); }
+      .daily-chart-wrap { height: 220px; }
+      .card { padding: 1.75rem; }
+      .calendar-day { font-size: 0.9rem; }
+    }
+    /* ========== ПК: широкая трёхколоночная раскладка ========== */
+    @media (min-width: 1024px) {
+      .auth-screen { max-width: 440px; }
+      .app-screen {
+        width: 100%;
+        max-width: min(1600px, 94vw);
+        margin: 0 auto;
+        padding: 0 2.5rem 3rem;
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1.4fr 1fr;
+        grid-template-rows: auto 1fr auto auto;
+        gap: 0 2rem;
+        align-items: start;
+      }
+      .app-screen .header-row {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+        padding: 1.25rem 0 1.5rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+      }
+      .app-screen .user-name { font-size: 1.15rem; font-weight: 600; }
+      .app-screen .btn-logout {
+        padding: 0.6rem 1.4rem;
+        font-size: 0.95rem;
+        border-radius: 10px;
+      }
+      /* Левая колонка: Привычки */
+      .app-screen .card.card-right {
+        grid-column: 1;
+        grid-row: 2;
+      }
+      /* Центр: Серия и прогресс */
+      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) {
+        grid-column: 2;
+        grid-row: 2;
+        min-height: 0;
+      }
+      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) .progress-circles {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+      }
+      /* Правая колонка: Текущие задачи */
+      .app-screen .card.card-tasks {
+        grid-column: 3;
+        grid-row: 2;
+      }
+      .app-screen .card.card-calendar {
+        grid-column: 1 / -1;
+        grid-row: 3;
+      }
+      .app-screen > p:last-of-type { grid-column: 1 / -1; grid-row: 4; margin-top: 1rem; }
+      /* Карточки: крупнее и читабельнее на ПК */
+      .app-screen .card {
+        padding: 2rem 2.25rem;
+        margin-bottom: 0;
+        border-radius: 16px;
+        box-shadow: none;
+        border: 1px solid var(--border);
+      }
+      .app-screen .card h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+      .app-screen .card.card-right .day-achievement-block { margin-top: 0; padding-top: 0; border-top: none; }
+      .app-screen .card.card-right .habits-progress,
+      .app-screen .card.card-right .top-habits { margin-top: 1.75rem; }
+      .app-screen .card.card-right .habits-progress h3,
+      .app-screen .card.card-right .top-habits h3 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 0.9rem;
+      }
+      .daily-chart-wrap {
+        height: 280px;
+        padding: 24px;
+        border-radius: 14px;
+      }
+      .chart-card { margin-top: 1.5rem; }
+      .chart-card h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.9rem;
+      }
+      .chart-card .month-stats { font-size: 0.9rem; opacity: 0.9; }
+      .progress-circles { gap: 1.25rem; }
+      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) .weekly-progress-card {
+        padding: 1.5rem 1.75rem;
+      }
+      .app-screen .card:not(.card-right):not(.card-tasks):not(.card-calendar) .weekly-progress-card .value { font-size: 1.9rem; }
+      .progress-circle-wrap {
+        padding: 1.35rem 1rem;
+        border-radius: 14px;
+      }
+      .progress-circle-wrap .label { font-size: 0.7rem; letter-spacing: 0.04em; }
+      .progress-circle-wrap .value { font-size: 1.8rem; font-weight: 700; }
+      .circle-svg { width: 72px; height: 72px; }
+      .calendar-days { gap: 12px; }
+      .calendar-day { font-size: 1.05rem; border-radius: 12px; }
+      .calendar-grid { margin-bottom: 0.75rem; }
+      .task-item {
+        padding: 1.15rem 1.4rem;
+        border-radius: 12px;
+        margin-bottom: 0.65rem;
+      }
+      .add-task-row { gap: 0.85rem; }
+      .add-task-row input { font-size: 1.05rem; padding: 0.9rem 1.1rem; border-radius: 12px; }
+      .app-screen .card.card-tasks .today-badge { font-size: 0.95rem; margin-bottom: 0.4rem; }
+      .app-screen .card.card-tasks .stats-row { margin-bottom: 1rem; font-size: 1rem; }
+      .top-habit-row { margin-bottom: 0.75rem; }
+      .top-habit-row .name { min-width: 9rem; font-size: 0.95rem; }
+      .habit-row { margin-bottom: 0.85rem; }
+      .habit-bar-wrap { flex: 0 0 100px; height: 8px; border-radius: 4px; }
+      .month-nav span { font-size: 1.2rem; font-weight: 600; }
+      .month-nav button { width: 44px; height: 44px; font-size: 1.3rem; border-radius: 12px; }
+      .btn-mark-day { border-radius: 12px; padding: 1rem; font-size: 1rem; }
+    }
+    @media (min-width: 1440px) {
+      .app-screen {
+        max-width: min(1720px, 92vw);
+        padding: 0 3.5rem 3.5rem;
+        gap: 0 2.5rem;
+      }
+      .app-screen .card { padding: 2.25rem 2.5rem; }
+      .app-screen .card h2 { font-size: 1.3rem; }
+    }
+
+    @media (max-width: 1023px) {
+      .app-screen { max-width: 560px; justify-content: flex-start; padding-top: 2.5rem; padding-bottom: 1.5rem; width: 100%; padding-left: 1.5rem; padding-right: 1.5rem; }
+    }
+
+    .hidden { display: none !important; }
+
+    h1 {
+      font-size: 1.75rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: none;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 1rem;
+      background: var(--card-hover);
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 0.85rem 1.25rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      margin-top: 0.25rem;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-soft);
+    }
+
+    .btn-secondary {
+      background: var(--accent-light);
+      color: var(--accent);
+      margin-top: 0.75rem;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(48, 209, 88, 0.25);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .tab:hover:not(.active) {
+      background: var(--card-hover);
+      color: var(--text);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+    }
+
+    .header-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .header-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .header-greeting {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 0.15rem;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .header-icon:hover {
+      background: var(--card-hover);
+      color: var(--text);
+    }
+
+    .btn-logout {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      width: auto;
+      background: var(--card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .btn-logout:hover {
+      background: var(--card-hover);
+      color: var(--text);
+    }
+
+    .add-task-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .add-task-row input {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .btn-add {
+      width: auto;
+      padding: 0.75rem 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .task-list {
+      list-style: none;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .task-item.done {
+      background: var(--accent-light);
+      border-color: var(--accent-soft);
+    }
+
+    .task-item.done .task-label {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-checkbox {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+
+    .task-item.done .task-checkbox {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .task-checkbox::after {
+      content: '✓';
+      font-size: 14px;
+      font-weight: bold;
+      opacity: 0;
+    }
+
+    .task-item.done .task-checkbox::after {
+      opacity: 1;
+    }
+
+    .task-label {
+      flex: 1;
+      font-size: 1rem;
+    }
+
+    .task-delete {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.25rem;
+      font-size: 1.2rem;
+      line-height: 1;
+      opacity: 0.6;
+    }
+
+    .task-delete:hover {
+      color: #c44;
+      opacity: 1;
+    }
+
+    .day-achievement-block {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .card-right .day-achievement-block { border-top: none; }
+    .card-right .day-achievement-block:first-child { margin-top: 0; padding-top: 0; }
+
+    .day-achievement-block p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-mark-day {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .btn-mark-day:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .month-nav span {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .month-nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .month-nav button {
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .month-nav button:hover {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 0.5rem;
+    }
+
+    .calendar-weekday {
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 0.35rem 0;
+    }
+
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-day {
+      position: relative;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .calendar-day.other-month {
+      opacity: 0.4;
+    }
+
+    .calendar-day.today {
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .calendar-day.achievement {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .calendar-day.achievement::after {
+      content: '✓';
+      position: absolute;
+      bottom: 2px;
+      right: 3px;
+      font-size: 0.65rem;
+      font-weight: bold;
+    }
+
+    .calendar-day .day-num { position: relative; z-index: 1; }
+    .calendar-day.achievement .day-num { position: relative; z-index: 1; }
+
+    .error-msg {
+      background: rgba(180, 60, 60, 0.2);
+      color: #f88;
+      padding: 0.6rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .empty-state p { margin-bottom: 0.5rem; }
+
+    .today-badge {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .month-stats {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .month-stats strong { color: var(--accent); }
+
+    .month-nav .btn-today {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.75rem;
+      width: auto;
+      margin-top: -0.1px
+    }
+
+    .quick-add {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .quick-add-btn {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+      width: auto;
+      border-radius: 20px;
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .quick-add-btn:hover {
+      border-color: var(--border);
+      color: var(--text);
+      background: var(--card-hover);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    .legend-dot.today { border: 2px solid var(--accent); background: var(--card); }
+    .legend-dot.achievement { background: var(--accent); border: none; }
+
+    .dashboard-intro {
+      margin-bottom: 1.5rem;
+    }
+    .dashboard-intro h3 { font-size: 1rem; margin-bottom: 0.35rem; color: var(--text); }
+    .dashboard-intro p { font-size: 0.9rem; color: var(--text-muted); }
+
+    .weekly-progress-card {
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .weekly-progress-card .label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+    .weekly-progress-card .value { font-size: 1.75rem; font-weight: 700; color: var(--text); }
+    .weekly-progress-card .value span { font-size: 0.95rem; font-weight: 500; color: var(--text-muted); }
+
+    .weekly-progress-ring {
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .weekly-progress-ring svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .weekly-progress-ring .ring-bg {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 6;
+    }
+    .weekly-progress-ring .ring-fill {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 0 214;
+      transition: stroke-dasharray 0.3s;
+    }
+    .weekly-progress-ring .ring-value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+
+    .activity-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .activity-cards-single {
+      grid-template-columns: 1fr;
+    }
+
+    .activity-card {
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .activity-card .icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .activity-card.steps .icon { background: rgba(255, 159, 10, 0.2); color: var(--chart-orange); }
+    .activity-card .title { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.2rem; }
+    .activity-card .value { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+    .activity-card .activity-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+    .activity-btn { font-size: 0.7rem; padding: 0.3rem 0.5rem; border-radius: 8px; border: none; background: var(--accent-light); color: var(--accent); cursor: pointer; font-family: inherit; }
+    .activity-btn.link { background: none; color: var(--text-muted); }
+
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .modal-content {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      border-radius: 14px;
+      max-width: 320px;
+      width: 90%;
+      position: relative;
+    }
+    .modal-content h3 { margin-bottom: 1rem; font-size: 1.1rem; }
+    .modal-content input { width: 100%; margin-bottom: 1rem; }
+    .modal-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .streak-block {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: var(--card-hover);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+    }
+    .streak-block .label { font-size: 0.9rem; color: var(--text-muted); }
+    .streak-block .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--chart-orange);
+    }
+    .streak-block .value span { font-size: 1rem; font-weight: 500; color: var(--text-muted); }
+
+    .progress-circles {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .progress-circle-wrap {
+      background: var(--card-hover);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      text-align: center;
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+    .progress-circle-wrap .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .progress-circle-wrap .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--chart-green);
+    }
+    .progress-circle-wrap.momentum .value { color: var(--chart-blue); }
+    .progress-circle-wrap.weekly .value { color: var(--chart-green); }
+    .progress-circle-wrap.monthly .value { color: var(--chart-green); }
+    .circle-svg {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 0.5rem;
+      display: block;
+    }
+    .circle-svg circle { fill: none; stroke-width: 6; }
+    .circle-svg .bg { stroke: var(--border); }
+    .circle-svg .fill { stroke: var(--chart-green); stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; }
+    .circle-svg.momentum .fill { stroke: var(--chart-blue); }
+    .circle-svg.weekly .fill { stroke: var(--chart-green); }
+    .circle-svg.monthly .fill { stroke: var(--chart-green); }
+
+    .chart-card { margin-top: 0.5rem; }
+    .chart-card h3 { font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text); text-align: center; }
+    .daily-chart-wrap {
+      height: 200px;
+      margin-bottom: 0.5rem;
+      position: relative;
+      background: var(--card-hover);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+    .daily-chart-wrap canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+    .stats-row span { color: var(--text-muted); }
+    .stats-row strong { color: var(--chart-green); }
+
+    .habits-progress { margin-top: 1rem; }
+    .habits-progress h3 { font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text); }
+    .habit-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+    }
+    .habit-row .name { flex: 1; color: var(--text); }
+    .habit-row .pct { color: var(--text-muted); min-width: 2.5rem; }
+    .habit-bar-wrap {
+      flex: 0 0 80px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .habit-bar { height: 100%; background: var(--chart-green); border-radius: 3px; transition: width 0.2s; }
+
+    .top-habits { margin-top: 1rem; }
+    .top-habits h3 { font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text); }
+    .top-habit-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .top-habit-row .name { width: 5rem; color: var(--text); }
+    .top-habit-row .bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .top-habit-row .bar { height: 100%; border-radius: 4px; transition: width 0.2s; }
+    .top-habit-row .pct { min-width: 2.5rem; color: var(--text-muted); font-size: 0.8rem; }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      margin-top: 0.75rem;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+    .heatmap-cell.filled { background: var(--accent); }
+    .heatmap-cell.today { box-shadow: 0 0 0 2px var(--chart-blue); }
+  </style>
+</head>
+<body>
+  <div id="auth-screen" class="auth-screen">
+    <h1>Трекер достижений</h1>
+    <p class="subtitle">Здоровый образ жизни и дисциплина каждый день</p>
+    <div class="card">
+      <div class="tabs">
+        <button type="button" class="tab active" data-tab="login">Вход</button>
+        <button type="button" class="tab" data-tab="register">Регистрация</button>
+      </div>
+      <div id="auth-error" class="error-msg hidden" role="alert"></div>
+      <form id="form-login">
+        <label for="login-username">Имя пользователя</label>
+        <input type="text" id="login-username" required autocomplete="username">
+        <label for="login-password">Пароль</label>
+        <input type="password" id="login-password" required autocomplete="current-password">
+        <button type="submit" class="btn btn-primary">Войти</button>
+      </form>
+      <form id="form-register" class="hidden">
+        <label for="reg-username">Имя пользователя</label>
+        <input type="text" id="reg-username" required autocomplete="username">
+        <label for="reg-password">Пароль</label>
+        <input type="password" id="reg-password" required autocomplete="new-password">
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="app-screen" class="app-screen hidden">
+    <div class="header-row">
+      <div class="header-profile">
+        <div class="header-avatar" id="header-avatar">?</div>
+        <div>
+          <span class="header-greeting" id="header-greeting">Доброе утро!</span>
+          <span class="user-name"><span id="current-username"></span></span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="header-icon" aria-label="Уведомления">🔔</button>
+        <button type="button" class="header-icon" id="btn-refresh" aria-label="Обновить">↻</button>
+        <button type="button" class="btn btn-logout" id="btn-logout">Выйти</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="weekly-progress-card">
+        <div>
+          <span class="label">Ежедневная цель</span>
+          <div class="value" id="streak-value">0 <span>дней подряд</span></div>
+        </div>
+        <div class="weekly-progress-ring">
+          <svg viewBox="0 0 80 80">
+            <circle class="ring-bg" cx="40" cy="40" r="34"/>
+            <circle class="ring-fill" id="streak-ring-svg" cx="40" cy="40" r="34"/>
+          </svg>
+          <span class="ring-value" id="streak-ring">0</span>
+        </div>
+      </div>
+      <div class="activity-cards activity-cards-single">
+        <div class="activity-card steps" id="steps-card">
+          <div class="icon">👟</div>
+          <div class="activity-card-content">
+            <div class="title">Шаги за сегодня</div>
+            <div class="value" id="activity-steps">—</div>
+            <div class="activity-actions">
+              <button type="button" class="activity-btn" id="btn-enable-pedometer">Включить шагомер</button>
+              <button type="button" class="activity-btn link" id="btn-manual-steps">Ввести вручную</button>
+            </div>
+            <p id="pedometer-status" class="hidden" style="font-size:0.8rem;margin-top:0.5rem;color:var(--text-muted);"></p>
+          </div>
+        </div>
+      </div>
+      <div class="progress-circles" id="progress-circles"></div>
+      <div class="chart-card">
+        <h3>Ежедневный прогресс</h3>
+        <div class="daily-chart-wrap">
+          <canvas id="daily-chart"></canvas>
+        </div>
+        <p class="month-stats" style="margin-bottom:0;">Последние 14 дней — линия вверх: день выполнен, вниз: нет.</p>
+      </div>
+    </div>
+
+    <div class="card card-tasks">
+      <h2>Текущие задачи</h2>
+      <p class="today-badge" id="today-badge"></p>
+      <div class="stats-row">
+        <span>Сделано: <strong id="stat-done">0</strong></span>
+        <span>Осталось: <strong id="stat-left">0</strong></span>
+      </div>
+      <div class="quick-add" id="quick-add"></div>
+      <div class="add-task-row">
+        <input type="text" id="new-task" placeholder="Например: Пробежка 30 мин" maxlength="80">
+        <button type="button" class="btn btn-primary btn-add" id="btn-add-task">Добавить</button>
+      </div>
+      <ul class="task-list" id="task-list"></ul>
+    </div>
+
+    <div class="card card-right">
+      <div class="day-achievement-block">
+        <p id="day-status-text">Отметьте все задачи дня, чтобы засчитать достижение.</p>
+        <button type="button" class="btn btn-secondary btn-mark-day" id="btn-mark-day" disabled>Отметить день как достижение</button>
+      </div>
+      <div class="habits-progress">
+        <h3>Привычки</h3>
+        <div id="habits-list"></div>
+      </div>
+      <div class="top-habits">
+        <h3>Топ привычек</h3>
+        <div id="top-habits-list"></div>
+      </div>
+    </div>
+
+    <div class="card card-calendar">
+      <h2>Достижения за месяц</h2>
+      <div class="month-nav">
+        <button type="button" id="month-prev" aria-label="Предыдущий месяц">‹</button>
+        <span id="month-title">Март 2025</span>
+        <div class="month-nav-buttons">
+          <button type="button" class="btn btn-secondary btn-today" id="month-today">Сегодня</button>
+          <button type="button" id="month-next" aria-label="Следующий месяц">›</button>
+        </div>
+      </div>
+      <p class="month-stats" id="month-stats"></p>
+      <div class="calendar-grid">
+        <span class="calendar-weekday">Пн</span>
+        <span class="calendar-weekday">Вт</span>
+        <span class="calendar-weekday">Ср</span>
+        <span class="calendar-weekday">Чт</span>
+        <span class="calendar-weekday">Пт</span>
+        <span class="calendar-weekday">Сб</span>
+        <span class="calendar-weekday">Вс</span>
+      </div>
+      <div class="calendar-days" id="calendar-days"></div>
+      <div class="legend">
+        <span class="legend-item"><span class="legend-dot today"></span> сегодня</span>
+        <span class="legend-item"><span class="legend-dot achievement"></span> день достижения</span>
+      </div>
+    </div>
+
+    <div id="steps-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <h3>Шаги за сегодня</h3>
+        <input type="number" id="manual-steps-input" placeholder="Введите количество" min="0" max="999999">
+        <div class="modal-buttons">
+          <button type="button" class="btn btn-primary" id="btn-save-manual-steps">Сохранить</button>
+          <button type="button" class="btn activity-btn link" id="btn-reset-steps">Сбросить</button>
+        </div>
+        <button type="button" class="modal-close" id="btn-close-steps-modal">×</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    (function() {
+      const DB_NAME = 'LevelUpTracker';
+      const DB_VERSION = 1;
+      const STORE = 'kv';
+
+      const weekdays = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+      const months = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+      const monthsShort = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+      const DEFAULT_TASKS = ['Пробежка или ходьба', 'Вода 1,5–2 л', 'Зарядка 10 мин', 'Сон до 23:00', 'Чтение 20 мин'];
+
+      var db = null;
+      var cache = { users: {}, userData: {}, currentUser: null };
+
+      function openDB() {
+        return new Promise(function(resolve, reject) {
+          var req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onerror = function() { reject(req.error); };
+          req.onsuccess = function() { db = req.result; resolve(db); };
+          req.onupgradeneeded = function(e) {
+            if (!e.target.result.objectStoreNames.contains(STORE)) {
+              e.target.result.createObjectStore(STORE);
+            }
+          };
+        });
+      }
+
+      function idbGet(key) {
+        return new Promise(function(resolve, reject) {
+          if (!db) { resolve(null); return; }
+          var tx = db.transaction(STORE, 'readonly');
+          var req = tx.objectStore(STORE).get(key);
+          req.onsuccess = function() { resolve(req.result); };
+          req.onerror = function() { reject(req.error); };
+        });
+      }
+
+      function idbSet(key, val) {
+        return new Promise(function(resolve, reject) {
+          if (!db) { resolve(); return; }
+          var tx = db.transaction(STORE, 'readwrite');
+          var req = tx.objectStore(STORE).put(val, key);
+          req.onsuccess = function() { resolve(); };
+          req.onerror = function() { reject(req.error); };
+        });
+      }
+
+      function migrateFromLocalStorage() {
+        try {
+          var rawU = localStorage.getItem('tracker_users');
+          var rawD = localStorage.getItem('tracker_data');
+          var rawC = localStorage.getItem('tracker_current_user');
+          if (rawU) cache.users = JSON.parse(rawU);
+          if (rawD) cache.userData = JSON.parse(rawD);
+          if (rawC) cache.currentUser = rawC;
+        } catch (e) {}
+      }
+
+      function initStorage() {
+        return openDB()
+          .then(function() {
+            return Promise.all([
+              idbGet('users'),
+              idbGet('userData'),
+              idbGet('currentUser')
+            ]);
+          })
+          .then(function(vals) {
+            if (vals[0]) cache.users = vals[0];
+            if (vals[1]) cache.userData = vals[1];
+            if (vals[2]) cache.currentUser = vals[2];
+            if (Object.keys(cache.users).length === 0 && Object.keys(cache.userData).length === 0) {
+              migrateFromLocalStorage();
+              return persistAll();
+            }
+            return Promise.resolve();
+          })
+          .catch(function() {
+            migrateFromLocalStorage();
+          });
+      }
+
+      function persistAll() {
+        return Promise.all([
+          idbSet('users', cache.users),
+          idbSet('userData', cache.userData),
+          idbSet('currentUser', cache.currentUser)
+        ]).catch(function() {});
+      }
+
+      function getUsers() {
+        return cache.users || {};
+      }
+
+      function saveUsers(users) {
+        cache.users = users;
+        idbSet('users', users).catch(function() {});
+      }
+
+      function getUserData(username) {
+        var all = cache.userData || {};
+        if (!all[username]) {
+          all[username] = { tasks: [], dailyDone: {}, monthAchievements: {}, dailySteps: {} };
+        }
+        if (!all[username].dailySteps) all[username].dailySteps = {};
+        return all[username];
+      }
+
+      function getStepsToday() {
+        var user = getCurrentUser();
+        if (!user) return 0;
+        var data = getUserData(user);
+        var today = todayKey();
+        return (data.dailySteps || {})[today] || 0;
+      }
+
+      function setStepsToday(n) {
+        var user = getCurrentUser();
+        if (!user) return;
+        var data = getUserData(user);
+        if (!data.dailySteps) data.dailySteps = {};
+        data.dailySteps[todayKey()] = Math.max(0, parseInt(n, 10) || 0);
+        setUserData(user, data);
+      }
+
+      function setUserData(username, data) {
+        if (!cache.userData) cache.userData = {};
+        cache.userData[username] = data;
+        idbSet('userData', cache.userData).catch(function() {});
+      }
+
+      function getCurrentUser() {
+        return cache.currentUser || null;
+      }
+
+      function setCurrentUser(username) {
+        cache.currentUser = username;
+        idbSet('currentUser', username).catch(function() {});
+      }
+
+      function todayKey() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+
+      function monthKey(year, month) {
+        return year + '-' + String(month).padStart(2, '0');
+      }
+
+      // --- Auth UI ---
+      const authScreen = document.getElementById('auth-screen');
+      const appScreen = document.getElementById('app-screen');
+      const authError = document.getElementById('auth-error');
+
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+          const t = this.dataset.tab;
+          document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+          this.classList.add('active');
+          document.getElementById('form-login').classList.toggle('hidden', t !== 'login');
+          document.getElementById('form-register').classList.toggle('hidden', t !== 'register');
+          authError.classList.add('hidden');
+          authError.style.color = ''; authError.style.background = '';
+        });
+      });
+
+      document.getElementById('form-login').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        const users = getUsers();
+        if (!users[username] || users[username] !== btoa(encodeURIComponent(password))) {
+          authError.textContent = 'Неверный логин или пароль';
+          authError.style.color = ''; authError.style.background = '';
+          authError.classList.remove('hidden');
+          return;
+        }
+        authError.classList.add('hidden');
+        setCurrentUser(username);
+        showApp();
+      });
+
+      document.getElementById('form-register').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        if (username.length < 2) {
+          authError.textContent = 'Имя пользователя минимум 2 символа';
+          authError.style.color = ''; authError.style.background = '';
+          authError.classList.remove('hidden');
+          return;
+        }
+        if (password.length < 4) {
+          authError.textContent = 'Пароль минимум 4 символа';
+          authError.style.color = ''; authError.style.background = '';
+          authError.classList.remove('hidden');
+          return;
+        }
+        const users = getUsers();
+        if (users[username]) {
+          authError.textContent = 'Такой пользователь уже есть';
+          authError.style.color = ''; authError.style.background = '';
+          authError.classList.remove('hidden');
+          return;
+        }
+        users[username] = btoa(encodeURIComponent(password));
+        saveUsers(users);
+        setUserData(username, { tasks: [], dailyDone: {}, monthAchievements: {} });
+        authError.classList.add('hidden');
+        setCurrentUser(username);
+        showApp();
+      });
+
+      document.getElementById('btn-logout').addEventListener('click', function() {
+        setCurrentUser(null);
+        appScreen.classList.add('hidden');
+        authScreen.classList.remove('hidden');
+        authError.textContent = 'Вы вышли. Данные сохранены на устройстве — войдите снова в любое время.';
+        authError.style.color = 'var(--accent)';
+        authError.style.background = 'var(--accent-light)';
+        authError.classList.remove('hidden');
+      });
+
+      var btnRefresh = document.getElementById('btn-refresh');
+      if (btnRefresh) btnRefresh.addEventListener('click', function() {
+        updateDashboard();
+        loadTasks();
+        renderCalendar();
+      });
+
+
+      function getGreeting() {
+        var h = new Date().getHours();
+        if (h < 12) return 'Доброе утро!';
+        if (h < 18) return 'Добрый день!';
+        return 'Добрый вечер!';
+      }
+
+      function showApp() {
+        authScreen.classList.add('hidden');
+        appScreen.classList.remove('hidden');
+        const user = getCurrentUser();
+        document.getElementById('current-username').textContent = user;
+        var av = document.getElementById('header-avatar');
+        if (av) av.textContent = (user || '?').charAt(0).toUpperCase();
+        var gr = document.getElementById('header-greeting');
+        if (gr) gr.textContent = getGreeting();
+        updateTodayBadge();
+        renderQuickAdd();
+        loadTasks();
+        updateDashboard();
+        renderCalendar();
+        updateDayAchievementButton();
+        updateActivityCards();
+      }
+
+      function updateActivityCards() {
+        var steps = getStepsToday();
+        var stepsEl = document.getElementById('activity-steps');
+        if (stepsEl) {
+          if (steps > 0) {
+            stepsEl.textContent = steps.toLocaleString('ru') + ' шагов';
+          } else if (pedometerActive) {
+            stepsEl.textContent = '0 шагов';
+          } else {
+            stepsEl.textContent = '—';
+          }
+        }
+        updateStepsButtonsState();
+      }
+
+      function updateStepsButtonsState() {
+        var btnEnable = document.getElementById('btn-enable-pedometer');
+        if (pedometerActive && btnEnable) {
+          btnEnable.textContent = 'Остановить шагомер';
+          btnEnable.disabled = false;
+        } else if (btnEnable) {
+          btnEnable.textContent = 'Включить шагомер';
+          btnEnable.disabled = false;
+        }
+      }
+
+      var pedometerActive = false;
+      var pedometerHandler = null;
+      var pedometerRefreshInterval = null;
+
+      function showPedometerMsg(msg, isError) {
+        var el = document.getElementById('pedometer-status');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        el.style.color = isError ? 'var(--chart-orange)' : 'var(--accent)';
+      }
+      function hidePedometerMsg() {
+        var el = document.getElementById('pedometer-status');
+        if (el) { el.textContent = ''; el.classList.add('hidden'); }
+      }
+
+      function startPedometer() {
+        if (pedometerActive) return;
+        hidePedometerMsg();
+        if (typeof DeviceMotionEvent === 'undefined') {
+          showPedometerMsg('Датчик недоступен', true);
+          return;
+        }
+
+        var fast = 9.8, slow = 9.8;
+        var buf = [];
+        var lastStepTime = 0;
+        var BUF_SIZE = 5;
+        var CENTER = 2;
+        var MIN_STEP_MS = 350;
+        var THRESHOLD = 0.12;
+
+        pedometerHandler = function(e) {
+          var a = e.accelerationIncludingGravity || e.acceleration;
+          if (!a || typeof a.x !== 'number') return;
+          var mag = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+          fast = 0.7 * fast + 0.3 * mag;
+          slow = 0.94 * slow + 0.06 * mag;
+          var d = fast - slow;
+          var now = Date.now();
+          buf.push(d);
+          if (buf.length > BUF_SIZE) buf.shift();
+          if (buf.length < BUF_SIZE) return;
+          var mid = buf[CENTER];
+          var isPeak = mid >= buf[0] && mid >= buf[1] && mid >= buf[3] && mid >= buf[4];
+          var gap = now - lastStepTime;
+          if (isPeak && Math.abs(mid) > THRESHOLD && gap >= MIN_STEP_MS) {
+            lastStepTime = now;
+            var newCount = getStepsToday() + 1;
+            setStepsToday(newCount);
+            var el = document.getElementById('activity-steps');
+            if (el) el.textContent = newCount.toLocaleString('ru') + ' шагов';
+            updateActivityCards();
+          }
+        };
+
+        function doStart() {
+          pedometerActive = true;
+          try {
+            window.addEventListener('devicemotion', pedometerHandler);
+          } catch (err) {
+            pedometerActive = false;
+            updateStepsButtonsState();
+            return;
+          }
+          updateStepsButtonsState();
+          updateActivityCards();
+          if (pedometerRefreshInterval) clearInterval(pedometerRefreshInterval);
+          pedometerRefreshInterval = setInterval(function() {
+            if (!pedometerActive) return;
+            var steps = getStepsToday();
+            var stepsEl = document.getElementById('activity-steps');
+            if (stepsEl) stepsEl.textContent = (steps > 0 ? steps.toLocaleString('ru') : '0') + ' шагов';
+          }, 1500);
+          showPedometerMsg('Шагомер включён', false);
+          setTimeout(hidePedometerMsg, 3000);
+        }
+
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+          showPedometerMsg('Браузер запросит доступ к датчику движения. Нажмите «Разрешить» в диалоге.', false);
+          DeviceMotionEvent.requestPermission()
+            .then(function(perm) {
+              hidePedometerMsg();
+              if (perm === 'granted') {
+                doStart();
+              } else {
+                showPedometerMsg('Доступ не дан. Можно ввести шаги вручную.', true);
+              }
+            })
+            .catch(function() {
+              hidePedometerMsg();
+              showPedometerMsg('Доступ отклонён или ошибка. Можно ввести шаги вручную.', true);
+            });
+        } else {
+          doStart();
+        }
+      }
+
+      function stopPedometer() {
+        if (!pedometerActive || !pedometerHandler) return;
+        try {
+          window.removeEventListener('devicemotion', pedometerHandler);
+        } catch (err) {}
+        if (pedometerRefreshInterval) {
+          clearInterval(pedometerRefreshInterval);
+          pedometerRefreshInterval = null;
+        }
+        pedometerActive = false;
+        pedometerHandler = null;
+        hidePedometerMsg();
+        updateStepsButtonsState();
+        updateActivityCards();
+      }
+
+      document.getElementById('btn-enable-pedometer').addEventListener('click', function() {
+        if (pedometerActive) stopPedometer();
+        else startPedometer();
+      });
+      document.getElementById('btn-manual-steps').addEventListener('click', function() {
+        var inp = document.getElementById('manual-steps-input');
+        var modal = document.getElementById('steps-modal');
+        if (inp) inp.value = getStepsToday() || '';
+        if (modal) modal.classList.remove('hidden');
+      });
+      document.getElementById('btn-save-manual-steps').addEventListener('click', function() {
+        var inp = document.getElementById('manual-steps-input');
+        if (inp) setStepsToday(inp.value);
+        document.getElementById('steps-modal').classList.add('hidden');
+        updateActivityCards();
+      });
+      document.getElementById('btn-reset-steps').addEventListener('click', function() {
+        setStepsToday(0);
+        document.getElementById('manual-steps-input').value = '';
+        document.getElementById('steps-modal').classList.add('hidden');
+        updateActivityCards();
+      });
+      document.getElementById('btn-close-steps-modal').addEventListener('click', closeStepsModal);
+      document.getElementById('steps-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeStepsModal();
+      });
+      function closeStepsModal() {
+        document.getElementById('steps-modal').classList.add('hidden');
+      }
+
+      function updateDashboard() {
+        updateStreak();
+        updateProgressCircles();
+        renderDailyChart();
+        updateDoneLeftStats();
+        renderHabitsProgress();
+        renderTopHabits();
+      }
+
+      function getStreak() {
+        const user = getCurrentUser();
+        if (!user) return 0;
+        const data = getUserData(user);
+        var count = 0;
+        var d = new Date();
+        for (var i = 0; i < 366; i++) {
+          var dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+          if (!isDayMarkedAchievement(dateStr)) break;
+          count++;
+          d.setDate(d.getDate() - 1);
+        }
+        return count;
+      }
+
+      function updateStreak() {
+        var n = getStreak();
+        var el = document.getElementById('streak-value');
+        if (el) el.innerHTML = n + ' <span>дней подряд</span>';
+        var ring = document.getElementById('streak-ring');
+        if (ring) ring.textContent = n;
+        var ringSvg = document.getElementById('streak-ring-svg');
+        if (ringSvg) {
+          var c = 2 * Math.PI * 34;
+          var fill = Math.min(n / 7, 1) * c;
+          ringSvg.setAttribute('stroke-dasharray', fill + ' ' + c);
+        }
+        updateActivityCards();
+      }
+
+      function updateProgressCircles() {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const tasks = data.tasks || [];
+        const totalTasks = tasks.length || 1;
+        const today = todayKey();
+        const doneToday = (data.dailyDone[today] || []).length;
+        const dailyPct = Math.round((doneToday / totalTasks) * 100);
+
+        var now = new Date();
+        var weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        var weekAchievements = 0;
+        for (var w = 0; w < 7; w++) {
+          var d = new Date(weekStart);
+          d.setDate(weekStart.getDate() + w);
+          var mk = monthKey(d.getFullYear(), d.getMonth() + 1);
+          var daysArr = (data.monthAchievements || {})[mk] || [];
+          if (daysArr.indexOf(d.getDate()) >= 0) weekAchievements++;
+        }
+        var weeklyPct = Math.round((weekAchievements / 7) * 100);
+
+        var monthKeyCur = monthKey(now.getFullYear(), now.getMonth() + 1);
+        var achievedDays = (data.monthAchievements || {})[monthKeyCur] || [];
+        var daysSoFar = now.getDate();
+        var monthlyPct = daysSoFar ? Math.round((achievedDays.length / daysSoFar) * 100) : 0;
+        monthlyPct = Math.min(100, monthlyPct);
+
+        var momentum = Math.round((dailyPct + weeklyPct + monthlyPct) / 3);
+
+        var html = '';
+        [['momentum', 'MOMENTUM', momentum, 'momentum'], ['daily', 'DAILY PROGRESS', dailyPct, 'daily'], ['weekly', 'WEEKLY PROGRESS', weeklyPct, 'weekly'], ['monthly', 'MONTHLY PROGRESS', monthlyPct, 'monthly']].forEach(function(x) {
+          var id = x[0], label = x[1], val = x[2], cls = x[3];
+          var r = 28;
+          var c = 2 * Math.PI * r;
+          var fill = (val / 100) * c;
+          html += '<div class="progress-circle-wrap ' + id + '"><svg class="circle-svg ' + id + '" viewBox="0 0 64 64"><circle class="bg" cx="32" cy="32" r="' + r + '"/><circle class="fill" cx="32" cy="32" r="' + r + '" stroke-dasharray="' + fill + ' ' + c + '"/></svg><div class="label">' + label + '</div><div class="value">' + val + '%</div></div>';
+        });
+        document.getElementById('progress-circles').innerHTML = html;
+      }
+
+      function getDayProgress(dateStr) {
+        const user = getCurrentUser();
+        if (!user) return 0;
+        const data = getUserData(user);
+        const tasks = data.tasks || [];
+        if (tasks.length === 0) return 0;
+        const done = (data.dailyDone[dateStr] || []).length;
+        return Math.round((done / tasks.length) * 100);
+      }
+
+      var dailyChartInstance = null;
+      function renderDailyChart() {
+        var labels = [];
+        var data = [];
+        for (var i = 0; i < 14; i++) {
+          var d = new Date();
+          d.setDate(d.getDate() - (13 - i));
+          var dateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+          labels.push('');
+          data.push(getDayProgress(dateStr));
+        }
+        var canvas = document.getElementById('daily-chart');
+        if (!canvas) return;
+        if (typeof Chart === 'undefined') {
+          canvas.parentNode.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;padding:1rem;">Загрузка графика…</p>';
+          return;
+        }
+        if (dailyChartInstance) {
+          dailyChartInstance.data.labels = labels;
+          dailyChartInstance.data.datasets[0].data = data;
+          dailyChartInstance.update('none');
+          return;
+        }
+        var ctx = canvas.getContext('2d');
+        var grad = ctx.createLinearGradient(0, 0, 0, 200);
+        grad.addColorStop(0, 'rgba(45, 212, 191, 0.45)');
+        grad.addColorStop(0.5, 'rgba(45, 212, 191, 0.2)');
+        grad.addColorStop(1, 'rgba(45, 212, 191, 0.02)');
+        dailyChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Прогресс',
+              data: data,
+              borderColor: '#2dd4bf',
+              backgroundColor: grad,
+              fill: true,
+              tension: 0.35,
+              pointRadius: 4,
+              pointHoverRadius: 5,
+              pointBackgroundColor: '#2dd4bf',
+              pointBorderColor: '#1a2332',
+              pointBorderWidth: 1,
+              borderWidth: 2.5,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: { padding: { top: 8, right: 12, bottom: 8, left: 12 } },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(26, 35, 50, 0.95)',
+                titleColor: '#e8eaed',
+                bodyColor: '#2dd4bf',
+                borderColor: 'rgba(255,255,255,0.1)',
+                borderWidth: 1,
+                callbacks: {
+                  label: function(ctx) {
+                    return ctx.raw + '%';
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                display: false,
+                grid: { display: false }
+              },
+              y: {
+                min: 0,
+                max: 100,
+                display: false,
+                grid: { display: false }
+              }
+            }
+          },
+          plugins: [{
+            id: 'chartBg',
+            beforeDraw: function(chart) {
+              var ctx = chart.ctx;
+              var area = chart.chartArea;
+              if (!area) return;
+              ctx.save();
+              ctx.fillStyle = '#1a2332';
+              ctx.fillRect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+              ctx.restore();
+            }
+          }]
+        });
+      }
+
+      function updateDoneLeftStats() {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const tasks = data.tasks || [];
+        const today = todayKey();
+        const done = (data.dailyDone[today] || []).length;
+        document.getElementById('stat-done').textContent = done;
+        document.getElementById('stat-left').textContent = tasks.length - done;
+      }
+
+      function getTaskProgressInMonth(taskId) {
+        const user = getCurrentUser();
+        if (!user) return 0;
+        const data = getUserData(user);
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        var count = 0;
+        for (var day = 1; day <= daysInMonth; day++) {
+          var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+          if ((data.dailyDone[dateStr] || []).indexOf(taskId) >= 0) count++;
+        }
+        return daysInMonth ? Math.round((count / daysInMonth) * 100) : 0;
+      }
+
+      function renderHabitsProgress() {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const tasks = data.tasks || [];
+        const container = document.getElementById('habits-list');
+        if (tasks.length === 0) { container.innerHTML = '<p class="empty-state">Добавьте задачи — здесь появится прогресс по дням месяца.</p>'; return; }
+        var html = '';
+        tasks.forEach(function(task) {
+          var pct = getTaskProgressInMonth(task.id);
+          html += '<div class="habit-row"><span class="name">' + escapeHtml(task.name) + '</span><div class="habit-bar-wrap"><div class="habit-bar" style="width:' + pct + '%"></div></div><span class="pct">' + pct + '%</span></div>';
+        });
+        container.innerHTML = html;
+      }
+
+      function renderTopHabits() {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const tasks = data.tasks || [];
+        var arr = tasks.map(function(t) { return { name: t.name, pct: getTaskProgressInMonth(t.id) }; });
+        arr.sort(function(a, b) { return b.pct - a.pct; });
+        var top = arr.slice(0, 5);
+        const colors = ['var(--chart-green)', 'var(--chart-blue)', 'var(--chart-purple)', 'var(--chart-orange)', 'var(--accent)'];
+        var html = '';
+        top.forEach(function(h, i) {
+          html += '<div class="top-habit-row"><span class="name">' + escapeHtml(h.name) + '</span><div class="bar-wrap"><div class="bar" style="width:' + h.pct + '%;background:' + colors[i] + '"></div></div><span class="pct">' + h.pct + '%</span></div>';
+        });
+        if (top.length === 0) html = '<p class="empty-state">Нет данных за месяц.</p>';
+        document.getElementById('top-habits-list').innerHTML = html;
+      }
+
+      function updateTodayBadge() {
+        const d = new Date();
+        const day = d.getDate();
+        const month = monthsShort[d.getMonth()];
+        const year = d.getFullYear();
+        document.getElementById('today-badge').textContent = day + ' ' + month + ' ' + year;
+      }
+
+      function renderQuickAdd() {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const hasTasks = (data.tasks || []).length > 0;
+        const container = document.getElementById('quick-add');
+        container.innerHTML = '';
+        if (!hasTasks) {
+          DEFAULT_TASKS.forEach(function(name) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn quick-add-btn';
+            btn.textContent = '+ ' + name;
+            btn.addEventListener('click', function() { addTaskByName(name); });
+            container.appendChild(btn);
+          });
+        }
+      }
+
+      function addTaskByName(name) {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        data.tasks = data.tasks || [];
+        const id = 't' + Date.now();
+        data.tasks.push({ id: id, name: name });
+        setUserData(user, data);
+        renderQuickAdd();
+        loadTasks();
+      }
+
+      // --- Tasks ---
+      let viewMonth = new Date().getMonth();
+      let viewYear = new Date().getFullYear();
+
+      function loadTasks() {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const list = document.getElementById('task-list');
+        const today = todayKey();
+        const doneToday = data.dailyDone[today] || [];
+
+        list.innerHTML = '';
+        (data.tasks || []).forEach((task, i) => {
+          const li = document.createElement('li');
+          li.className = 'task-item' + (doneToday.includes(task.id) ? ' done' : '');
+          li.dataset.taskId = task.id;
+          li.innerHTML = '<span class="task-checkbox" role="button" tabindex="0"></span><span class="task-label">' + escapeHtml(task.name) + '</span><button type="button" class="task-delete" aria-label="Удалить">×</button>';
+          const cb = li.querySelector('.task-checkbox');
+          const del = li.querySelector('.task-delete');
+          cb.addEventListener('click', () => toggleTask(task.id));
+          cb.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleTask(task.id); } });
+          del.addEventListener('click', () => deleteTask(task.id));
+          list.appendChild(li);
+        });
+
+        if (data.tasks.length === 0) {
+          list.innerHTML = '<li class="empty-state"><p>Пока нет задач.</p><p>Нажмите кнопки выше или добавьте свою задачу.</p></li>';
+        }
+        renderQuickAdd();
+        updateDashboard();
+        updateDayAchievementButton();
+      }
+
+      function escapeHtml(s) {
+        const div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      function toggleTask(taskId) {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const today = todayKey();
+        let done = data.dailyDone[today] || [];
+        if (done.includes(taskId)) {
+          done = done.filter(id => id !== taskId);
+        } else {
+          done = [...done, taskId];
+        }
+        data.dailyDone[today] = done;
+        setUserData(user, data);
+        loadTasks();
+      }
+
+      function deleteTask(taskId) {
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        data.tasks = (data.tasks || []).filter(t => t.id !== taskId);
+        const today = todayKey();
+        if (data.dailyDone[today]) {
+          data.dailyDone[today] = data.dailyDone[today].filter(id => id !== taskId);
+        }
+        Object.keys(data.dailyDone || {}).forEach(day => {
+          data.dailyDone[day] = data.dailyDone[day].filter(id => id !== taskId);
+        });
+        setUserData(user, data);
+        loadTasks();
+      }
+
+      document.getElementById('btn-add-task').addEventListener('click', addTask);
+      document.getElementById('new-task').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); addTask(); }
+      });
+
+      function addTask() {
+        const input = document.getElementById('new-task');
+        const name = input.value.trim();
+        if (!name) return;
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        data.tasks = data.tasks || [];
+        const id = 't' + Date.now();
+        data.tasks.push({ id, name });
+        setUserData(user, data);
+        input.value = '';
+        loadTasks();
+      }
+
+      function allTasksDoneToday() {
+        const user = getCurrentUser();
+        if (!user) return false;
+        const data = getUserData(user);
+        const tasks = data.tasks || [];
+        if (tasks.length === 0) return false;
+        const today = todayKey();
+        const done = data.dailyDone[today] || [];
+        return tasks.every(t => done.includes(t.id));
+      }
+
+      function isDayMarkedAchievement(dateStr) {
+        const user = getCurrentUser();
+        if (!user) return false;
+        const data = getUserData(user);
+        const [y, m, d] = dateStr.split('-');
+        const key = monthKey(y, m);
+        const days = data.monthAchievements[key] || [];
+        return days.indexOf(parseInt(d, 10)) >= 0;
+      }
+
+      function updateDayAchievementButton() {
+        const btn = document.getElementById('btn-mark-day');
+        const status = document.getElementById('day-status-text');
+        const today = todayKey();
+        const already = isDayMarkedAchievement(today);
+        if (already) {
+          btn.disabled = true;
+          btn.textContent = 'День отмечен как достижение';
+          status.textContent = 'Сегодня вы уже отметили день как достижение.';
+          return;
+        }
+        const allDone = allTasksDoneToday();
+        btn.disabled = !allDone;
+        if (allDone) {
+          status.textContent = 'Все задачи выполнены. Отметьте день в достижениях месяца.';
+          btn.textContent = 'Отметить день как достижение';
+        } else {
+          status.textContent = 'Выполните все задачи дня, чтобы отметить достижение.';
+          btn.textContent = 'Отметить день как достижение';
+        }
+      }
+
+      document.getElementById('btn-mark-day').addEventListener('click', function() {
+        if (this.disabled) return;
+        const user = getCurrentUser();
+        if (!user) return;
+        const data = getUserData(user);
+        const today = todayKey();
+        const [y, m, d] = today.split('-');
+        const key = monthKey(y, m);
+        data.monthAchievements = data.monthAchievements || {};
+        data.monthAchievements[key] = data.monthAchievements[key] || [];
+        const dayNum = parseInt(d, 10);
+        if (!data.monthAchievements[key].includes(dayNum)) {
+          data.monthAchievements[key].push(dayNum);
+        }
+        setUserData(user, data);
+        updateDayAchievementButton();
+        updateDashboard();
+        renderCalendar();
+      });
+
+      // --- Calendar ---
+      function renderCalendar() {
+        const container = document.getElementById('calendar-days');
+        const first = new Date(viewYear, viewMonth, 1);
+        let start = first.getDay() - 1;
+        if (start < 0) start += 7;
+        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
+        const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
+        const prevDays = new Date(prevYear, prevMonth + 1, 0).getDate();
+
+        document.getElementById('month-title').textContent = months[viewMonth] + ' ' + viewYear;
+
+        var key = monthKey(viewYear, viewMonth + 1);
+        var cur = getCurrentUser();
+        var achieved = cur ? ((getUserData(cur).monthAchievements || {})[key] || []) : [];
+        var daysInCurMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+        document.getElementById('month-stats').textContent = 'Дней с достижениями: ' + achieved.length + ' из ' + daysInCurMonth;
+
+        const today = new Date();
+        const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+        container.innerHTML = '';
+        for (let i = 0; i < start; i++) {
+          const d = prevDays - start + i + 1;
+          const dateStr = prevYear + '-' + String(prevMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+          const cell = document.createElement('div');
+          cell.className = 'calendar-day other-month';
+          cell.innerHTML = '<span class="day-num">' + d + '</span>';
+          if (isDayMarkedAchievement(dateStr)) cell.classList.add('achievement');
+          container.appendChild(cell);
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+          const dateStr = viewYear + '-' + String(viewMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+          const cell = document.createElement('div');
+          cell.className = 'calendar-day';
+          cell.innerHTML = '<span class="day-num">' + d + '</span>';
+          if (dateStr === todayStr) cell.classList.add('today');
+          if (isDayMarkedAchievement(dateStr)) cell.classList.add('achievement');
+          container.appendChild(cell);
+        }
+        const total = start + daysInMonth;
+        const nextCells = total % 7 === 0 ? 0 : 7 - (total % 7);
+        const nextM = viewMonth === 11 ? 0 : viewMonth + 1;
+        const nextY = viewMonth === 11 ? viewYear + 1 : viewYear;
+        for (let i = 0; i < nextCells; i++) {
+          const d = i + 1;
+          const dateStr = nextY + '-' + String(nextM + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+          const cell = document.createElement('div');
+          cell.className = 'calendar-day other-month';
+          cell.innerHTML = '<span class="day-num">' + d + '</span>';
+          if (isDayMarkedAchievement(dateStr)) cell.classList.add('achievement');
+          container.appendChild(cell);
+        }
+      }
+
+      document.getElementById('month-prev').addEventListener('click', function() {
+        viewMonth--;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+        renderCalendar();
+      });
+
+      document.getElementById('month-next').addEventListener('click', function() {
+        viewMonth++;
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+        renderCalendar();
+      });
+
+      document.getElementById('month-today').addEventListener('click', function() {
+        var now = new Date();
+        viewMonth = now.getMonth();
+        viewYear = now.getFullYear();
+        renderCalendar();
+      });
+
+      // --- Init ---
+      function runApp() {
+        if (getCurrentUser()) {
+          showApp();
+        } else {
+          authScreen.classList.remove('hidden');
+          appScreen.classList.add('hidden');
+        }
+      }
+      initStorage().then(runApp).catch(runApp);
+    })();
+  </script>
+</body>
+</html>

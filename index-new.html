@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <title>LevelUp — Fitness Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-512.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card-dark: #1a1a1c;
+      --card-light: #2a2a2c;
+      --lime: #c4ff0d;
+      --lime-dark: #a8d90a;
+      --text: #ffffff;
+      --text-muted: rgba(255,255,255,0.6);
+      --orange: #ff9500;
+      --green: #30d158;
+      --blue: #0a84ff;
+      --red: #ff453a;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .header-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--lime), var(--green));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #000;
+      transition: transform 0.3s ease;
+    }
+    
+    .avatar:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+    
+    .greeting {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    
+    .username {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    
+    .header-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--card-dark);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .header-icon:hover {
+      background: var(--card-light);
+      transform: scale(1.1);
+      border-color: var(--lime);
+    }
+    
+    /* Date Pills */
+    .date-pills {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      animation: slideUp 0.6s ease;
+    }
+    
+    .date-pills::-webkit-scrollbar { display: none; }
+    
+    .date-pill {
+      min-width: 56px;
+      height: 64px;
+      background: var(--card-dark);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .date-pill:hover {
+      transform: translateY(-4px);
+      border-color: var(--lime);
+      box-shadow: 0 8px 20px rgba(196, 255, 13, 0.2);
+    }
+    
+    .date-pill.active {
+      background: var(--lime);
+      color: #000;
+      transform: scale(1.05);
+    }
+    
+    .date-pill .day { font-size: 1.2rem; font-weight: 700; }
+    .date-pill .weekday { font-size: 0.75rem; opacity: 0.7; }
+    
+    /* Main Card */
+    .main-card {
+      background: var(--card-dark);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      position: relative;
+      animation: slideUp 0.7s ease;
+      transition: all 0.3s ease;
+    }
+    
+    .main-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(196, 255, 13, 0.3);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    
+    .main-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--lime), var(--green));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .main-card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    /* Calories Card */
+    .calories-card {
+      background: var(--lime);
+      color: #000;
+      border-radius: 20px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      animation: slideUp 0.8s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .calories-card:hover {
+      transform: scale(1.02) rotate(-1deg);
+      box-shadow: 0 20px 60px rgba(196, 255, 13, 0.4);
+    }
+    
+    .calories-card .label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0.8;
+      margin-bottom: 0.5rem;
+    }
+    
+    .calories-value {
+      font-size: 3rem;
+      font-weight: 800;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .calories-value .unit {
+      font-size: 1rem;
+      font-weight: 600;
+      opacity: 0.7;
+    }
+    
+    .progress-ring {
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100px;
+      height: 100px;
+    }
+    
+    .progress-ring circle {
+      fill: none;
+      stroke-width: 8;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .progress-ring .bg { stroke: rgba(0,0,0,0.2); }
+    .progress-ring .fill { stroke: #000; stroke-linecap: round; }
+    
+    .calories-card:hover .progress-ring {
+      animation: pulse 1s infinite;
+    }
+    
+    /* Activity Cards */
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      animation: slideUp 0.9s ease;
+    }
+    
+    .activity-card {
+      background: var(--card-dark);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      padding: 1.25rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .activity-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(196, 255, 13, 0.1));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .activity-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      border-color: var(--lime);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+    
+    .activity-card:hover::after {
+      opacity: 1;
+    }
+    
+    .activity-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s ease;
+    }
+    
+    .activity-card:hover .activity-icon {
+      transform: scale(1.1) rotate(10deg);
+      background: var(--lime);
+    }
+    
+    .activity-title {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    
+    .activity-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    /* Task List */
+    .task-section {
+      animation: slideUp 1s ease;
+    }
+    
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    
+    .task-item {
+      background: var(--card-dark);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    
+    .task-item:hover {
+      transform: translateX(8px);
+      border-color: var(--lime);
+      background: var(--card-light);
+    }
+    
+    .task-checkbox {
+      width: 28px;
+      height: 28px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    
+    .task-item:hover .task-checkbox {
+      border-color: var(--lime);
+      transform: scale(1.1);
+    }
+    
+    .task-item.done .task-checkbox {
+      background: var(--lime);
+      border-color: var(--lime);
+    }
+    
+    .task-checkbox::after {
+      content: '✓';
+      color: #000;
+      font-weight: 700;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.3s ease;
+    }
+    
+    .task-item.done .task-checkbox::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .task-content {
+      flex: 1;
+    }
+    
+    .task-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .task-item.done .task-name {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+    
+    .task-time {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    
+    .task-calories {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--lime);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: translateY(-50%) scale(1); }
+      50% { transform: translateY(-50%) scale(1.05); }
+    }
+    
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(26, 26, 28, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 1rem;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+    
+    .nav-item {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .nav-item:hover {
+      transform: scale(1.15);
+    }
+    
+    .nav-item.active {
+      background: var(--lime);
+      color: #000;
+    }
+    
+    .nav-item.fab {
+      width: 64px;
+      height: 64px;
+      background: var(--lime);
+      color: #000;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-top: -32px;
+      box-shadow: 0 8px 24px rgba(196, 255, 13, 0.4);
+    }
+    
+    .nav-item.fab:hover {
+      transform: scale(1.2) rotate(90deg);
+    }
+    
+    @media (min-width: 768px) {
+      .container { max-width: 720px; }
+      .activity-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-profile">
+        <div class="avatar" id="avatar">A</div>
+        <div>
+          <div class="greeting" id="greeting">Доброе утро!</div>
+          <div class="username" id="username">Готовы к тренировке?</div>
+        </div>
+      </div>
+      <div class="header-icon">🔔</div>
+    </div>
+    
+    <!-- Date Pills -->
+    <div class="date-pills" id="date-pills"></div>
+    
+    <!-- Calories Card -->
+    <div class="calories-card">
+      <div class="label">Отчет</div>
+      <div class="calories-value">
+        <span id="calories-value">1690</span>
+        <span class="unit">калорий</span>
+      </div>
+      <div style="font-size: 0.9rem; opacity: 0.8;">1 из 4 активностей выполнено</div>
+      <svg class="progress-ring" viewBox="0 0 100 100">
+        <circle class="bg" cx="50" cy="50" r="42"/>
+        <circle class="fill" id="progress-circle" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="66"/>
+      </svg>
+    </div>
+    
+    <!-- Activity Grid -->
+    <div class="activity-grid">
+      <div class="activity-card">
+        <div class="activity-icon">👟</div>
+        <div class="activity-title">Шаги</div>
+        <div class="activity-value" id="steps-value">—</div>
+      </div>
+      <div class="activity-card">
+        <div class="activity-icon">⏱️</div>
+        <div class="activity-title">Дистанция</div>
+        <div class="activity-value">4.06 км</div>
+      </div>
+      <div class="activity-card">
+        <div class="activity-icon">🔥</div>
+        <div class="activity-title">Сожжено</div>
+        <div class="activity-value">250 ккал</div>
+      </div>
+    </div>
+    
+    <!-- Tasks -->
+    <div class="task-section">
+      <h2 class="section-title">Активности</h2>
+      <div id="task-list"></div>
+    </div>
+  </div>
+  
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div class="nav-item active">🏠</div>
+    <div class="nav-item">📊</div>
+    <div class="nav-item fab">+</div>
+    <div class="nav-item">📷</div>
+    <div class="nav-item">👤</div>
+  </div>
+  
+  <script>
+    // Date Pills
+    const datePills = document.getElementById('date-pills');
+    const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    const today = new Date();
+    
+    for (let i = -3; i <= 3; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const pill = document.createElement('div');
+      pill.className = 'date-pill' + (i === 0 ? ' active' : '');
+      pill.innerHTML = `
+        <div class="day">${date.getDate()}</div>
+        <div class="weekday">${weekdays[date.getDay()]}</div>
+      `;
+      pill.addEventListener('click', function() {
+        document.querySelectorAll('.date-pill').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+      });
+      datePills.appendChild(pill);
+    }
+    
+    // Greeting
+    const hour = new Date().getHours();
+    const greetingEl = document.getElementById('greeting');
+    if (hour < 12) greetingEl.textContent = 'Доброе утро!';
+    else if (hour < 18) greetingEl.textContent = 'Добрый день!';
+    else greetingEl.textContent = 'Добрый вечер!';
+    
+    // Tasks
+    const tasks = [
+      { name: 'Плавание', time: '30 минут', calories: 200, done: true },
+      { name: 'Средний бег', time: 'Сейчас', calories: 520, done: false },
+      { name: '7 мин. HIIT тренировка', time: '7 минут', calories: 105, done: false },
+      { name: 'Становая тяга', time: '15 подходов', calories: 1080, done: false }
+    ];
+    
+    const taskList = document.getElementById('task-list');
+    tasks.forEach((task, i) => {
+      const item = document.createElement('div');
+      item.className = 'task-item' + (task.done ? ' done' : '');
+      item.style.animationDelay = `${i * 0.1}s`;
+      item.innerHTML = `
+        <div class="task-checkbox"></div>
+        <div class="task-content">
+          <div class="task-name">${task.name}</div>
+          <div class="task-time">${task.time}</div>
+        </div>
+        <div class="task-calories">${task.calories}</div>
+      `;
+      item.addEventListener('click', function() {
+        this.classList.toggle('done');
+      });
+      taskList.appendChild(item);
+    });
+    
+    // Progress animation
+    const progressCircle = document.getElementById('progress-circle');
+    setTimeout(() => {
+      progressCircle.style.strokeDashoffset = '66';
+    }, 500);
+  </script>
+</body>
+</html>
