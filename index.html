@@ -774,6 +774,9 @@
       gap: 0.75rem;
       margin-bottom: 1.25rem;
     }
+    .activity-cards-single {
+      grid-template-columns: 1fr;
+    }
 
     .activity-card {
       background: var(--card);
@@ -787,7 +790,6 @@
 
     .activity-card .icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
     .activity-card.steps .icon { background: #fff3e6; color: var(--chart-orange); }
-    .activity-card.water .icon { background: #e6f3ff; color: var(--chart-blue); }
     .activity-card .title { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.2rem; }
     .activity-card .value { font-size: 1.1rem; font-weight: 700; color: var(--text); }
     .activity-card .activity-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
@@ -1016,7 +1018,7 @@
           <span class="ring-value" id="streak-ring">0</span>
         </div>
       </div>
-      <div class="activity-cards">
+      <div class="activity-cards activity-cards-single">
         <div class="activity-card steps" id="steps-card">
           <div class="icon">👟</div>
           <div class="activity-card-content">
@@ -1026,13 +1028,6 @@
               <button type="button" class="activity-btn" id="btn-enable-pedometer">Включить шагомер</button>
               <button type="button" class="activity-btn link" id="btn-manual-steps">Ввести вручную</button>
             </div>
-          </div>
-        </div>
-        <div class="activity-card water">
-          <div class="icon">💧</div>
-          <div>
-            <div class="title">Вода</div>
-            <div class="value" id="activity-water">—</div>
           </div>
         </div>
       </div>
@@ -1375,18 +1370,9 @@
       }
 
       function updateActivityCards() {
-        var user = getCurrentUser();
-        if (!user) return;
         var steps = getStepsToday();
         var stepsEl = document.getElementById('activity-steps');
         if (stepsEl) stepsEl.textContent = steps > 0 ? steps.toLocaleString('ru') + ' шагов' : '—';
-        var data = getUserData(user);
-        var today = todayKey();
-        var done = (data.dailyDone || {})[today] || [];
-        var tasks = (data.tasks || []);
-        var waterTask = tasks.find(function(t) { return (t.name || '').toLowerCase().indexOf('вод') >= 0; });
-        var waterEl = document.getElementById('activity-water');
-        if (waterEl) waterEl.textContent = waterTask && done.indexOf(waterTask.id) >= 0 ? 'Выполнено ✓' : (waterTask ? 'Не выполнено' : '—');
         updateStepsButtonsState();
       }
 
